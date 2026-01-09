@@ -12,12 +12,12 @@ Aşağıda kutucuk (checkbox) ile gösterilen maddelerden en az birini seçtiği
 
 ### Disk Erişimi
 
-- [ ]  **Blok bazlı disk erişimi** → block_id + offset
+- [x]  **Blok bazlı disk erişimi** → block_id + offset
 - [ ]  Rastgele erişim
 
 ### VT için Page (Sayfa) Anlamı
 
-- [ ]  VT hangisini kullanır? **Satır/ Sayfa** okuması
+- [x]  VT hangisini kullanır? **Satır/ Sayfa** okuması
 
 ---
 
@@ -25,7 +25,7 @@ Aşağıda kutucuk (checkbox) ile gösterilen maddelerden en az birini seçtiği
 
 - [ ]  Veritabanları, Sık kullanılan sayfaları bellekte (RAM) kopyalar mı (caching) ?
 
-- [ ]  LRU / CLOCK gibi algoritmaları
+- [x]  LRU / CLOCK gibi algoritmaları
 - [ ]  Diske yapılan I/O nasıl minimize ederler?
 
 # 2. Veri Yapıları Perspektifi
@@ -35,24 +35,25 @@ Aşağıda kutucuk (checkbox) ile gösterilen maddelerden en az birini seçtiği
 - [ ]  Clustered vs Non-Clustered Index Kavramı
 - [ ]  InnoDB satırı diskte nasıl durur?
 - [ ]  LSM-tree (LevelDB, RocksDB) farkı
-- [ ]  PostgreSQL heap + index ayrımı
+- [X]  PostgreSQL heap + index ayrımı
 
 DB diske yazarken:
 
-- [ ]  WAL (Write Ahead Log) İlkesi
+- [X]  WAL (Write Ahead Log) İlkesi
 - [ ]  Log disk (fsync vs write) sistem çağrıları farkı
 
 ---
 
 # Özet Tablo
 
-| Kavram      | Bellek          | Disk / DB      |
-| ----------- | --------------- | -------------- |
-| Adresleme   | Pointer         | Page + Offset  |
-| Hız         | O(1)            | Page IO        |
-| PK          | Yok             | Index anahtarı |
-| Veri yapısı | Array / Pointer | B+Tree         |
-| Cache       | CPU cache       | Buffer Pool    |
+| Kavram             | İşletim Sistemi / Bellek (RAM) | Veritabanı / Disk (PostgreSQL)      |
+| :----------------- | :----------------------------- | :---------------------------------- |
+| **Erişim Birimi**  | Byte / Word                    | **Page (Sayfa/Blok)** (8KB)         |
+| **Adresleme**      | Memory Pointer                 | **Block_id + Offset** (ItemPointer) |
+| **Hız / Maliyet**  | O(1) / Nanosecond              | **Page I/O** / Millisecond          |
+| **Veri Yapısı**    | Array / Linked List            | **B-Tree (Index) + Heap (Data)**    |
+| **Cache Yönetimi** | OS Page Cache (LRU)            | **Buffer Pool** (Clock Sweep Alg.)  |
+| **Kalıcılık**      | Volatile (Uçucu)               | **WAL** (Write Ahead Log) + fsync   |
 
 ---
 
@@ -63,22 +64,26 @@ Ekran kaydı. 2-3 dk. açık kaynak V.T. kodu üzerinde konunun gösterimi. Vide
 
 # Açıklama (Ort. 600 kelime)
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse lacinia luctus urna, vel aliquet lacus facilisis ac. Donec quis placerat orci, efficitur consectetur lacus. Sed rhoncus erat ex, at sagittis velit mollis et. Aliquam enim orci, sollicitudin sit amet libero quis, mollis ultricies risus. Fusce tempor, felis a consequat tristique, dolor magna convallis nulla, vel ullamcorper magna mauris non ipsum. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam quis imperdiet ex, at blandit sapien. Aliquam lacinia erat ac ipsum fringilla, quis vestibulum augue posuere. Nulla in enim nulla. Nunc euismod odio mauris, sed sollicitudin ex condimentum non. In efficitur egestas enim. Fusce tempus erat quis placerat convallis.
+Bu çalışma, açık kaynaklı ilişkisel veritabanı yönetim sistemi olan PostgreSQL'in kaynak kodları incelenerek; sistem programlama (işletim sistemi, disk I/O, bellek yönetimi) ve veri yapıları (B-Tree, Heap, WAL) perspektifinden performans optimizasyonlarını analiz etmek amacıyla hazırlanmıştır. Veritabanı sistemleri, işletim sisteminin sunduğu genel amaçlı dosya sistemi soyutlamalarının ötesine geçerek, disk erişim maliyetlerini minimize etmek ve veri bütünlüğünü sağlamak için özelleşmiş mimariler kullanır.
 
-Nam sit amet tincidunt ante. Pellentesque sit amet quam interdum, pellentesque dui vel, iaculis elit. Donec sed dui sodales nulla dignissim tincidunt. Maecenas semper metus id fermentum vulputate. Pellentesque lobortis hendrerit venenatis. Nullam imperdiet, ex eget ultricies egestas, mauris nunc aliquam ante, sed consectetur tellus ex vel leo. Nunc ut erat dapibus, auctor dolor eu, pretium sem. In lacinia congue eros et finibus. Aenean auctor, leo a feugiat placerat, urna felis lacinia purus, laoreet volutpat mi nisl eget dui. Ut vitae condimentum leo.
+**Sistem Perspektifi ve Disk Erişimi**
+Veritabanlarında performansın birincil darboğazı disk I/O işlemleridir. İşletim sistemi seviyesinde veriler byte akışı olarak görülse de, PostgreSQL veriyi blok bazlı (Page) yönetir. src/include/storage/bufpage.h dosyasında tanımlanan PageHeaderData yapısı, her bir 8KB'lık sayfanın başında yer alan meta verileri tutar. Bu yapı, sayfanın doluluk oranını, boş alan başlangıcını (pd_lower) ve satırların başlangıcını (pd_upper) takip eder. Veritabanı, veriye erişmek istediğinde diske rastgele (random access) gitmek yerine, bu blokları belleğe alarak okuma yapar.
 
-Maecenas ex diam, vehicula et nulla vel, mattis viverra metus. Nam at ex scelerisque, semper augue lobortis, semper est. Etiam id pretium odio, eget rutrum neque. Pellentesque blandit magna vel aliquam gravida. Nullam massa nisl, imperdiet at dapibus non, cursus vehicula turpis. Vestibulum rutrum hendrerit augue. Aliquam id nisi id arcu tempor venenatis vel nec erat. Morbi sed posuere erat. Morbi et sollicitudin urna. Suspendisse ullamcorper vitae purus sit amet sodales. Nam ut tincidunt ipsum, ut varius erat. Duis congue magna nec euismod condimentum. In hac habitasse platea dictumst. Nunc mattis odio sed enim laoreet imperdiet. In hac habitasse platea dictumst. Nullam tincidunt quis.
+Sayfa belleğe alındığında, içerisindeki spesifik bir satıra (tuple) erişim, satır/sayfa okuması mantığıyla yürütülür. src/backend/storage/page/bufpage.c içerisindeki PageGetItem fonksiyonu, sayfa başındaki "Line Pointer" dizisini kullanarak verinin sayfa içindeki ofsetine (offset) O(1) karmaşıklığında ulaşır. Bu yöntem, veri parçalansa (fragmentation) bile erişim hızının korunmasını sağlar.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse lacinia luctus urna, vel aliquet lacus facilisis ac. Donec quis placerat orci, efficitur consectetur lacus. Sed rhoncus erat ex, at sagittis velit mollis et. Aliquam enim orci, sollicitudin sit amet libero quis, mollis ultricies risus. Fusce tempor, felis a consequat tristique, dolor magna convallis nulla, vel ullamcorper magna mauris non ipsum. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nam quis imperdiet ex, at blandit sapien. Aliquam lacinia erat ac ipsum fringilla, quis vestibulum augue posuere. Nulla in enim nulla. Nunc euismod odio mauris, sed sollicitudin ex condimentum non. In efficitur egestas enim. Fusce tempus erat quis placerat convallis.
+**Bellek Yönetimi (Buffer Pool ve Clock Sweep)** Disk erişim maliyetini düşürmenin en etkili yolu, sık kullanılan sayfaların RAM’de tutulmasıdır (Caching). Ancak RAM sınırlı bir kaynaktır. PostgreSQL, hangi sayfanın bellekte kalıp hangisinin atılacağına karar vermek için "Clock Sweep" (bir tür LRU türevi) algoritmasını kullanır. src/backend/storage/buffer/freelist.c dosyasındaki StrategyGetBuffer fonksiyonu incelendiğinde, sistemin bir "saat" gibi buffer havuzunu taradığı, usage_count değeri 0 olan sayfaları bulup diske tahliye ettiği (eviction) ve yeni sayfaya yer açtığı görülür. Bu algoritma, sık erişilen verilerin bellekte kalmasını garanti altına alarak disk I/O sayısını minimize eder.
 
-Nam sit amet tincidunt ante. Pellentesque sit amet quam interdum, pellentesque dui vel, iaculis elit. Donec sed dui sodales nulla dignissim tincidunt. Maecenas semper metus id fermentum vulputate. Pellentesque lobortis hendrerit venenatis. Nullam imperdiet, ex eget ultricies egestas, mauris nunc aliquam ante, sed consectetur tellus ex vel leo. Nunc ut erat dapibus, auctor dolor eu, pretium sem. In lacinia congue eros et finibus. Aenean auctor, leo a feugiat placerat, urna felis lacinia purus, laoreet volutpat mi nisl eget dui. Ut vitae condimentum leo.
+**Veri Yapıları: Heap ve Index Ayrımı** PostgreSQL, verinin fiziksel olarak saklandığı yapı (Heap) ile veriye hızlı erişimi sağlayan yapıyı (Index) birbirinden ayırır. Verinin kendisi src/backend/access/heap/heapam.c dosyasındaki yöntemlerle (Heap Access Method) sırasız bir yığın olarak saklanırken; arama işlemleri için B-Tree gibi dengeli ağaç yapıları kullanılır. src/backend/access/nbtree/nbtsearch.c içerisindeki _bt_search fonksiyonu, B-Tree üzerinde kökten yaprağa doğru inerek aranan anahtarın bulunduğu sayfanın ID'sini (TID) döndürür. Bu ayrım, aynı veri üzerinde birden fazla indeks tanımlanabilmesine olanak tanır ancak her yazma işleminde hem Heap'in hem de indekslerin güncellenmesi maliyetini doğurur.
 
-Maecenas ex diam, vehicula et nulla vel, mattis viverra metus. Nam at ex scelerisque, semper augue lobortis, semper est. Etiam id pretium odio, eget rutrum neque. Pellentesque blandit magna vel aliquam gravida. Nullam massa nisl, imperdiet at dapibus non, cursus vehicula turpis. Vestibulum rutrum hendrerit augue. Aliquam id nisi id arcu tempor venenatis vel nec erat. Morbi sed posuere erat. Morbi et sollicitudin urna. Suspendisse ullamcorper vitae purus sit amet sodales. Nam ut tincidunt ipsum, ut varius erat. Duis congue magna nec euismod condimentum. In hac habitasse platea dictumst. Nunc mattis odio sed enim laoreet imperdiet. In hac habitasse platea dictumst. Nullam tincidunt quis.
+**Veri Bütünlüğü ve WAL (Write Ahead Log)** Performans kadar kritik olan bir diğer konu veri dayanıklılığıdır (Durability). Sistem çökmelerine karşı PostgreSQL, WAL (Write Ahead Log) ilkesini benimser. Veri sayfaları diske yazılmadan önce, yapılan değişikliğin kaydı src/backend/access/transam/xloginsert.c dosyasındaki XLogInsert fonksiyonu ile sıralı (sequential) bir log dosyasına yazılır. Rastgele disk yazma işlemi (random write) maliyetli olduğundan, logların sıralı yazılması performansı artırır ve fsync çağrılarıyla verinin kalıcılığı garanti altına alınır.
+
+Sonuç olarak; PostgreSQL'in kaynak kodları incelendiğinde, veritabanının sadece bir veri deposu olmadığı; disk bloklarını yöneten, özel bellek tahliye algoritmaları çalıştıran ve karmaşık veri yapılarını disk üzerinde organize eden sofistike bir sistem yazılımı olduğu görülmektedir.
 
 ## VT Üzerinde Gösterilen Kaynak Kodları
 
-Açıklama [Linki](https://...) \
-Açıklama [Linki](https://...) \
-Açıklama [Linki](https://...) \
-... \
-...
+Blok bazlı disk erişimi [Linki](https://github.com/postgres/postgres/blob/master/src/include/storage/bufpage.h) \
+Satır okuması [Linki](https://github.com/postgres/postgres/blob/master/src/backend/storage/page/bufpage.c) \
+Buffer pool clock [Linki](https://github.com/chen3593/PostgreSQL/blob/master/freelist.c) \
+Heap yapısı [Linki](https://github.com/postgres/postgres/blob/master/src/backend/access/heap/heapam.c) \
+İndex yapısı [Linki](Buffer pool clock [Linki](https://github.com/chen3593/PostgreSQL/blob/master/freelist.c)) \
+WAL ilkesi [Linki](https://github.com/postgres/postgres/blob/master/src/backend/access/transam/xloginsert.c)
