@@ -83,7 +83,7 @@ Sonuç olarak; PostgreSQL'in kaynak kodları incelendiğinde, veritabanının sa
 
 Blok bazlı disk erişimi [Linki](https://github.com/postgres/postgres/blob/master/src/include/storage/bufpage.h) \
 Satır okuması [Linki](https://github.com/postgres/postgres/blob/master/src/backend/storage/page/bufpage.c) \
-Buffer pool clock [Linki](https://github.com/chen3593/PostgreSQL/blob/master/freelist.c) \
+Buffer pool clock [Linki](https://github.com/postgres/postgres/blob/master/src/backend/storage/buffer/freelist.c) \
 Heap yapısı [Linki](https://github.com/postgres/postgres/blob/master/src/backend/access/heap/heapam.c) \
-İndex yapısı [Linki](Buffer pool clock [Linki](https://github.com/chen3593/PostgreSQL/blob/master/freelist.c)) \
+İndex yapısı [Linki](https://github.com/postgres/postgres/blob/master/src/backend/access/nbtree/nbtsearch.c) \
 WAL ilkesi [Linki](https://github.com/postgres/postgres/blob/master/src/backend/access/transam/xloginsert.c)
